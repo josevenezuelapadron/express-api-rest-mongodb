@@ -1,9 +1,10 @@
 require("./config/config.js");
+const mongoose = require("mongoose");
 const express = require("express");
+const bodyParser = require("body-parser");
+
 const app = express();
 const port = process.env.PORT;
-
-const bodyParser = require("body-parser");
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -11,27 +12,14 @@ app.use(bodyParser.urlencoded({extended: false}));
 // parse application/json
 app.use(bodyParser.json());
 
+// routes
+app.use(require("./routes/usuario.js"));
 
-app.get("/usuario", (req, res) => {
-  res.json("get Usuario");
-});
 
-app.post("/usuario", (req, res) => {
-  const body = req.body;
+mongoose.connect('mongodb://localhost:27017/cafe', {useNewUrlParser: true}, err => {
+  if (err) throw err;
 
-  res.json(body);
-});
-
-app.put("/usuario/:id", (req, res) => {
-  const id = req.params.id;
-
-  res.json({
-    id
-  });
-});
-
-app.delete("/usuario", (req, res) => {
-  res.json("delete Usuario");
+  console.log("Conexión exitosa");
 });
 
 app.listen(port, () => console.log(`Server running in port: ${port}`));
