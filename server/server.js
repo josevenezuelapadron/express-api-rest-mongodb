@@ -1,4 +1,4 @@
-require("./config/config.js");
+require("./config/configu.js");
 const mongoose = require("mongoose");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(require("./routes/usuario.js"));
 
 
-mongoose.connect('mongodb://localhost:27017/cafe', {useNewUrlParser: true}, err => {
+mongoose.connect(process.env.URLDB, {useNewUrlParser: true}, err => {
   if (err) throw err;
 
   console.log("Conexión exitosa");
