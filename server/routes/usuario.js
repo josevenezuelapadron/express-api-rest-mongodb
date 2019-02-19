@@ -2,9 +2,10 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const _ = require("underscore");
 const Usuario = require("../models/usuario.js");
+const { verificaToken, verificaAdminRol } = require("../middlewares/autenticacion.js");
 const app = express();
 
-app.get("/usuario", (req, res) => {
+app.get("/usuario", verificaToken, (req, res) => {
   const desde = Number(req.query.desde) || 0;
   const limite = Number(req.query.limite) || 5;
 
@@ -26,7 +27,7 @@ app.get("/usuario", (req, res) => {
   });
 });
 
-app.post("/usuario", (req, res) => {
+app.post("/usuario", [verificaToken, verificaAdminRol], (req, res) => {
   const body = req.body;
 
   const usuario = new Usuario({
@@ -51,7 +52,7 @@ app.post("/usuario", (req, res) => {
   });
 });
 
-app.put("/usuario/:id", (req, res) => {
+app.put("/usuario/:id", [verificaToken, verificaAdminRol], (req, res) => {
   const id = req.params.id;
   const body = _.pick(req.body, ["nombre", "email", "img", "role", "estado"]);
 
@@ -70,7 +71,7 @@ app.put("/usuario/:id", (req, res) => {
   });
 });
 
-app.delete("/usuario/:id", (req, res) => {
+app.delete("/usuario/:id", [verificaToken, verificaAdminRol], (req, res) => {
   const id = req.params.id;
 
   Usuario.findByIdAndUpdate(id, {estado: false}, {new: true}, (err, usuarioBorrado) => {
@@ -95,29 +96,6 @@ app.delete("/usuario/:id", (req, res) => {
       usuario: usuarioBorrado
     });
   }).exec();
-
-  /*Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        err
-      });
-    };
-
-    if (!usuarioBorrado) {
-      return res.status(400).json({
-        ok: false,
-        err: {
-          message: "Usuario no encontrado"
-        }
-      });
-    };
-
-    return res.status(200).json({
-      ok: true,
-      usuario: usuarioBorrado
-    });
-  }).exec();*/
 });
 
 module.exports = app;
