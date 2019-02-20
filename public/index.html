@@ -30,6 +30,7 @@
         // console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
 
         const id_token = googleUser.getAuthResponse().id_token;
+        console.log(id_token);
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/google');

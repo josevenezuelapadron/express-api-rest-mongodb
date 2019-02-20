@@ -57,18 +57,83 @@ async function verify(token) {
   });
   const payload = ticket.getPayload();
 
-  console.log(payload.name);
-  console.log(payload.email);
-  console.log(payload.picture);
+  return {
+    nombre: payload.name,
+    email: payload.email,
+    img: payload.picture,
+    google: true
+  }
 }
 
-app.post("/google", (req, res) => {
-  const token = req.body.idtoken;
+app.post("/google", async (req, res) => {
+  let token = req.body.idtoken;
+  const googleUser = await verify(token).catch(err => {
+    console.error(err);
 
-  verify(token);
+    return res.status(403).json({
+      ok: false,
+      err
+    });
+  });
 
-  res.status(200).json({
-    token
+  Usuario.findOne({email: googleUser.email}, (err, usuarioDB) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err
+      });
+    };
+
+    if (usuarioDB) {
+      // Si el usuario ya se habia creado una cuenta sin google
+      if (usuarioDB.google === false) {
+        return res.status(400).json({
+          ok: false,
+          err: {
+            message: "Debe usar su autenticacion normal"
+          }
+        });
+      } else {
+        // Si el usuario ya se habia creado su cuenta con google solo se renueva el token
+        token = jwt.sign({
+          usuario: usuarioDB
+        }, process.env.SEED, {expiresIn: process.env.CADUCIDAD_TOKEN});
+
+        return res.status(200).json({
+          ok: true,
+          usuario: usuarioDB,
+          token
+        });
+      }
+    } else {
+      // Si el usuario no existe en la BD
+      const usuario = new Usuario();
+
+      usuario.nombre = googleUser.nombre;
+      usuario.email = googleUser.email;
+      usuario.img = googleUser.nombre;
+      usuario.google = true;
+      usuario.password = ":)";
+
+      usuario.save((err, usuarioDB) => {
+        if (err) {
+          return res.status(500).json({
+            ok: false,
+            err
+          });
+        };
+
+        token = jwt.sign({
+          usuario: usuarioDB
+        }, process.env.SEED, {expiresIn: process.env.CADUCIDAD_TOKEN});
+
+        return res.status(200).json({
+          ok: true,
+          usuario: usuarioDB,
+          token
+        });
+      });
+    }
   });
 });
 
