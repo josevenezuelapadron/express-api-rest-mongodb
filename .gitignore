@@ -1,2 +1,14 @@
 node_modules
 .idea
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
+uploads/productos/*.jpg
+uploads/productos/*.jpeg
+uploads/productos/*.png
+uploads/productos/*.gif
+uploads/usuarios/*.jpg
+uploads/usuarios/*.jpeg
+uploads/usuarios/*.png
+uploads/usuarios/*.gif
